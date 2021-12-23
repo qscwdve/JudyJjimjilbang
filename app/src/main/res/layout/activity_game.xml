@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".GameActivity">
+
+    <RelativeLayout
+        android:id="@+id/scoreInfo"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/brown"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="쥬디의 찜질방"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_vertical"
+            android:layout_marginHorizontal="10sp"/>
+
+
+        <TextView
+            android:layout_toStartOf="@+id/score"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="점수 : "
+            android:textSize="20sp"
+            android:gravity="center"
+            android:layout_gravity="center"/>
+
+
+        <TextView
+            android:layout_marginHorizontal="10dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:text="0"
+            android:gravity="center"
+            android:layout_gravity="center_vertical"
+            android:layout_height="wrap_content"
+            android:id="@+id/score"
+            android:textSize="20sp"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/MainParent"
+        android:background="@drawable/background"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ImageView
+            android:id="@+id/fireRoom"
+            android:layout_width="160sp"
+            android:layout_height="130sp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="30sp"
+            android:layout_marginEnd="5sp"
+            android:src="@drawable/fire"
+            android:contentDescription="불꽃방" />
+        <ImageView
+            android:id="@+id/iceRoom"
+            android:layout_width="165sp"
+            android:layout_height="125sp"
+            android:scaleType="centerCrop"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="30sp"
+            android:layout_marginStart="10sp"
+            android:src="@drawable/iceroom"
+            android:contentDescription="얼음방" />
+
+        <ImageView
+            android:id="@+id/masa"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="35sp"
+            android:layout_marginTop="250sp"
+            android:src="@drawable/masa"
+            android:contentDescription="마사지" />
+
+        <ImageView
+            android:id="@+id/light"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="260sp"
+            android:layout_marginEnd="20sp"
+            android:src="@drawable/light"
+            android:contentDescription="라이트" />
+
+        <ImageView
+            android:id="@+id/stand1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="20sp"
+            android:layout_marginStart="20sp"
+            android:src="@drawable/stand"
+            android:contentDescription="의자1" />
+        <ImageView
+            android:id="@+id/stand2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="20sp"
+            android:layout_marginStart="110sp"
+            android:src="@drawable/stand"
+            android:contentDescription="의자2" />
+        <ImageView
+            android:id="@+id/stand3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="20sp"
+            android:layout_marginStart="200sp"
+            android:src="@drawable/stand"
+            android:contentDescription="의자3" />
+
+        <ImageView
+            android:id="@+id/water"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="27sp"
+            android:layout_marginBottom="120sp"
+            android:src="@drawable/water"
+            android:contentDescription="물" />
+        <ImageView
+            android:id="@+id/egg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="27sp"
+            android:layout_marginBottom="65sp"
+            android:src="@drawable/egg"
+            android:contentDescription="달걀" />
+
+        <ImageView
+            android:id="@+id/waste"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="30sp"
+            android:layout_marginBottom="20sp"
+            android:src="@drawable/waste"
+            android:contentDescription="쓰레기통" />
+
+        <ProgressBar
+            android:id="@+id/progressFireRoom"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="100sp"
+            android:layout_height="10sp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="80sp"
+            android:layout_marginEnd="35sp"
+            android:progressDrawable="@drawable/progressbar_custom"
+            android:progress="100"
+            android:visibility="gone"
+            tools:ignore="SmallSp" />
+
+        <ProgressBar
+            android:id="@+id/progressIceRoom"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="100sp"
+            android:layout_height="10sp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="75sp"
+            android:layout_marginStart="40sp"
+            android:progressDrawable="@drawable/progressbar_custom"
+            android:progress="100"
+            android:visibility="gone"
+            tools:ignore="SmallSp" />
+
+        <ProgressBar
+            android:id="@+id/progressLight"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="45dp"
+            android:layout_height="10sp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="340sp"
+            android:layout_marginEnd="54sp"
+            android:progress="100"
+            android:visibility="gone"
+            tools:ignore="SmallSp" />
+
+        <ProgressBar
+            android:id="@+id/progressMasa"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="45dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="320sp"
+            android:layout_marginStart="50sp"
+            android:visibility="gone"
+            android:progress="100" />
+
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/checkBoxIceRoom"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/check_box"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="130sp"
+            android:layout_marginStart="20sp" />
+
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/checkBoxFireRoom"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/check_box"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="130sp"
+            android:layout_marginEnd="15sp" />
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/checkBoxMasa"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/check_box"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="320sp"
+            android:layout_marginStart="7sp" />
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/checkBoxLight"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/check_box"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="330sp"
+            android:layout_marginEnd="10sp" />
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/checkBoxWater"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/check_box"
+            android:layout_marginEnd="7dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="130sp" />
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/checkBoxEgg"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/check_box"
+            android:layout_marginEnd="7dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="65sp" />
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/checkBoxWaste"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="7dp"
+            android:src="@drawable/check_box"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="10sp" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/judy">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/judyBody"
+                android:src="@drawable/judy"/>
+
+            <ImageView
+                android:id="@+id/judyLeft"
+                android:layout_width="25sp"
+                android:layout_height="25sp"
+                android:layout_alignStart="@+id/judyBody"
+                android:layout_alignBottom="@+id/judyBody"
+                android:layout_marginBottom="5sp" />
+
+            <ImageView
+                android:id="@+id/judyRight"
+                android:layout_alignEnd="@+id/judyBody"
+                android:layout_alignBottom="@+id/judyBody"
+                android:layout_marginBottom="5sp"
+                android:layout_width="25sp"
+                android:layout_height="25sp" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/masa"
+            android:layout_alignTop="@+id/masa"
+            android:id="@+id/masaStandQuestion"
+            android:visibility="gone">
+            <ImageView
+                android:id="@+id/masaQuestion"
+                android:adjustViewBounds="true"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/question"/>
+
+            <ImageView
+                android:id="@+id/masaQuestionValue"
+                android:layout_width="30sp"
+                android:layout_height="25sp"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/wateritem"/>
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>
