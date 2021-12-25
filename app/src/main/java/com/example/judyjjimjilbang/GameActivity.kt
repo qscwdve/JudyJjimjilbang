@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -13,12 +12,12 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.example.judyjjimjilbang.databinding.ActivityGameBinding
-import com.example.judyjjimjilbang.databinding.ActivityMainBinding
 import com.example.judyjjimjilbang.model.ItemPoint
 import com.example.judyjjimjilbang.model.SnackToProgress
+import com.example.judyjjimjilbang.model.XYPosition
 import java.util.*
+import kotlin.collections.ArrayList
 
 class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::inflate) {
     private var mCustomerNum = 100   // 쥬디의 찜질방 손님 최대 명수
@@ -61,7 +60,11 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
 
     // 손님의 요구를 시간내에 충족시키지 못할 경우 바로 게임이 끝난다.
     // 게임이 끝났는지 안끝났는지 판별하는 변수
-    private var mfinish = false
+    var mfinish = false    // false : 게임 안끝남 , true : 게임 끝남
+
+    // 손님이 있을 수 있는 위치를 저장한 배열
+    // 0 : 얼음방, 1 : 불꽃방, 2 : 마사지, 3 : 라이트, 4 : 의자1 , 5 : 의자2 , 6 : 의자3
+    val mCustomerExistPosition = Array<XYPosition>(7) { XYPosition(0F, 0F) }
 
     lateinit var handler : Handler
     private val nPL = 10000
@@ -142,13 +145,23 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
                 mItemPosition[index].height = view.measuredHeight
 
                 when(index){
-                    in 0..3 -> {
-                        // 서비스일 경우 - 얼음방, 불꽃방, 마사지, 라이트
+                    in 0..1 -> {
+                        // 얼음방, 불꽃방
                         mItemControlList[index].setItemPosition(view.x, view.y, view.measuredWidth, view.measuredHeight)
+                        mCustomerExistPosition[index].x = if(index == 1) view.x else view.x + view.measuredWidth/2
+                        mCustomerExistPosition[index].y = view.y + view.measuredHeight/2
+                    }
+                    in 2..3 -> {
+                        // 마사지, 라이트
+                        mItemControlList[index].setItemPosition(view.x, view.y, view.measuredWidth, view.measuredHeight)
+                        mCustomerExistPosition[index].x = view.x
+                        mCustomerExistPosition[index].y = view.y
                     }
                     in 4..6 -> {
                         // 의자일 경우 - 의자1, 의자2, 의자3
                         mStandControlList[index - 4].setPosition(view.x, view.y, view.measuredWidth, view.measuredHeight)
+                        mCustomerExistPosition[index].x = view.x - view.measuredWidth/3
+                        mCustomerExistPosition[index].y = view.y - view.measuredHeight * 1.5F
                     }
                 }
                 view.viewTreeObserver.removeOnGlobalLayoutListener(this)
@@ -169,7 +182,7 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
     }
 
     // 게임을 시작한다.
-    fun gameStart(){
+    private fun gameStart(){
         mCustomerStartCount = 0
         Thread(){
             while(mCustomerStartCount < mCustomerNum){
@@ -178,7 +191,7 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
                     break
                 }
                 var position = -1
-                // 손님은 8초마다 한번씩 오는데 남은 의자가 있으면 가게로 손님이 들어오고 의자가 없으면 다시 8초뒤를 기다린다.
+                // 손님은 6초마다 한번씩 오는데 남은 의자가 있으면 가게로 손님이 들어오고 의자가 없으면 다시 8초뒤를 기다린다.
                 Handler(Looper.getMainLooper()).post {
                     // 손님이 올 수 있는지 체크한다. 의자1, 의자2, 의자3 에 손님이 있는지 없는지 확인한다.
                     // 비어있으면 -1이므로 position 변수에 앞으로 오시는 손님의 초기위치를 정한다. (의자1, 의자2, 의자3 중 하나)
@@ -191,7 +204,7 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
                         mCustomerStartCount++
                     }
                 }
-                Thread.sleep(8000)
+                Thread.sleep(6000)
             }
         }.start()
     }
@@ -227,14 +240,16 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
         characterImage.layoutParams = characterImageLayoutParams
         characterImage.setTag(number)  // 받을 서비스 저장
 
-        setCustomerOnTouchListener(itemParent, characterBody, characterImage, num)
-
-        val characterProgress = ImageView(this)
-        characterProgress.id = nProL + num
-        characterProgress.setImageResource(R.drawable.question)
+        val characterTimer = ImageView(this)
+        characterTimer.id = nProL + num
+        characterTimer.setImageResource(R.drawable.question)
+        characterTimer.setTag(0)
         val layoutParams = RelativeLayout.LayoutParams(130, 160)
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
-        characterProgress.layoutParams = layoutParams
+        characterTimer.layoutParams = layoutParams
+
+        setCustomerOnTouchListener(itemParent, characterBody, characterImage, characterTimer, num)
+
 
         val itemRelativeLayout = RelativeLayout(this)
         itemRelativeLayout.id = nRL + num
@@ -243,7 +258,7 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
 
-        itemRelativeLayout.addView(characterProgress)
+        itemRelativeLayout.addView(characterTimer)
         itemRelativeLayout.addView(characterImage)
 
         itemParent.addView(characterBody)
@@ -254,70 +269,67 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
         // 캐릭터 위치 초기화 새로 오신 손님은 의자에만 앉아있을 수 있다. 의자는 4, 5, 6 중 하나이다.
         mCustomPosition[num] = position + 4
         mItemExistCheck[position + 4] = num
-        itemParent.x = mItemPosition[position + 4].x
-        itemParent.y = mItemPosition[position + 4].y - mItemPosition[position + 4].height * 2
-        customerTimerThreadStart(num, characterProgress)
+        itemParent.x = mCustomerExistPosition[position + 4].x
+        itemParent.y = mCustomerExistPosition[position + 4].y
+        customerTimerThreadStart(num, characterTimer)
     }
 
     private fun customerTimerThreadStart(num : Int, runItemValueView : ImageView){
         // num : 손님 번호
         val thread1 = Thread(){
-            var isEnd = false
             for(i in 1..4){
-                Thread.sleep(10000)
-                if(mCustomPosition[num] == -1){
-                    // 손님이 제시간내에 서비스를 다 받아서 가게를 나간 상태, 이미 손님 캐릭터도 지워졌다.
-                    isEnd = true
-                    break
+                // 6초에 한번씩 손님이 기다릴 수 있는 인내심이 떨어진다.
+                // 총 3번 참을 수 있다. 4번이 되면 손님의 인내심이 바닥나고 게임은 종료된다.
+                for(time in 1..60){
+                    Thread.sleep(100)
+                    if(mCustomPosition[num] == -1 || mfinish){
+                        // 손님이 제시간내에 서비스를 다 받아서 가게를 나간 상태, 이미 손님 캐릭터도 지워졌다.
+                        return@Thread
+                    }
                 }
-                else {
+                if(mCustomPosition[num] == -1 || mfinish){
+                    // 손님이 제시간내에 서비스를 다 받아서 가게를 나간 상태, 이미 손님 캐릭터도 지워졌다.
+                    return@Thread
+                } else {
                     handler.post {
-                        runItemValueView.setImageResource(when(i){
+                        val questionImage = when(i){
                             1 -> R.drawable.questionone
                             2 -> R.drawable.questiontwo
                             3 -> R.drawable.questionthree
                             else -> R.drawable.question
-                        })
+                        }
+                        runItemValueView.setImageResource(questionImage)
+                        runItemValueView.setTag(i)    // 손님의 인내심 게이지가 몇단계인지 저장
+                        if(mCustomPosition[num] == 2){
+                            // 손님이 마사지 서비스를 받고 있을 경우 gameActivity 의 question 을 제어해야 한다.
+                            binding.masaQuestion.setImageResource(questionImage)
+                        }
                     }
                 }
 
                 if(mfinish) {
                     // 이미 다른 손님의 욕구를 충족시키지 못해 게임이 끝난 상태
-                    break
+                    return@Thread
                 }
                 if(i == 4){
                     // 이 손님(num)의 욕구를 시간내에 충족시키지 못해 타임 오버로 게임이 종료되었다.
                     // Toast.makeText(this, "this game is over", Toast.LENGTH_SHORT).show()
                     mfinish = true
                     handler.post {
+                        runItemValueView.setImageResource(R.drawable.question_finish)
                         Toast.makeText(this, "the game is over!", Toast.LENGTH_SHORT).show()
-                        //gameFinish()
+                        gameFinish()
                     }
+                    return@Thread
                 }
             }
-            // 캐릭터 제거
-            if(!isEnd){
-                // 게임이 종료되었는데 캐릭터가 사라지지 않은 경우 삭제한다.
-                handler.post {
-                    val item = findViewById<RelativeLayout>(nRL + num)
-                    val parent = findViewById<LinearLayout>(nPL + num)
-                    if(mCustomPosition[num] != -1){
-                        mItemExistCheck[mCustomPosition[num]] = -1
-                        mCustomPosition[num] = -1
-                        item.removeAllViews()
-                        parent.removeAllViews()
-                        mCustomerFinishCount++
-                    }
-                }
-            }
-
         }
         thread1.start()
-        Log.d("thread", "thread state  :  ${thread1.state}")
+        // Log.d("thread", "thread state  :  ${thread1.state}")
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    fun setCustomerOnTouchListener(character: View, bodyImage: ImageView, itemImage: ImageView, num: Int){
+    fun setCustomerOnTouchListener(character: View, bodyImage: ImageView, itemImage: ImageView, timerView: ImageView, num: Int){
         // num = 손님번호
         character.setOnTouchListener(View.OnTouchListener { v, event ->
 
@@ -354,7 +366,7 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
                     // 손님이 의자 영역에 있으면 의자는 clickImage 로 바뀌어야 하고,
                     // 손님이 의자 영역에 있지 않으면 originImage 로 바뀌어야 한다.
                     for (i in 0..2) {
-                        if (mItemExistCheck[i + 4] == -1 && mStandControlList[i].checkItemIn(v.x, v.y)) {
+                        if (mItemExistCheck[i + 4] == -1 && mStandControlList[i].checkItemIn(ItemPoint(v.x, v.y, v.measuredWidth, v.measuredHeight))) {
                             // 의자에 앉아있는 손님은 없고, 의자 영역 안에 손님이 들어가 있음
                             if (!mStandControlList[i].isChangeImage) {
                                 // 손님이 의자 영역 안에 들어가 있는데 originImage 일 경우 -> clickImage 로 바꾼다
@@ -378,85 +390,99 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
                         v.y = (parentHeight - v.height).toFloat()
                     }
 
-                    var flag = false   // 손님이 위치를 이동할 수 있을 경우 : true, 위치를 이동할 수 없을 경우 : false
-                    // 뷰에서 손을 땠을 때 clickImage -> originImage 로 바꾸기
-                    // 손님이 서비스(얼음방, 불꽃방, 마사지, 라이트)를 받을 경우 progressbar 실행한다.
-                    for (i in 0..3) {
-                        if (mItemControlList[i].checkItemIn(v.x, v.y)) {
-                            // 서비스 영역 안에 손님이 들어가 있음 -> 다른 서비스 검사할 필요 없음. (break)
-                            if (mItemControlList[i].isChangeImage) {
-                                // 손님이 서비스를 받는다!
-                                mItemControlList[i].changeImage(1)  // originImage 로 바꾼다.
-                                if (!mItemControlList[i].lock && itemImage.getTag() == i) {
-                                    // 손님이 서비스를 받을 거기 때문에 이전에 위치했던 장소는 비어야 한다.
-                                    mItemExistCheck[mCustomPosition[num]] = -1
-                                    // 손님의 현재 위치를 받을 서비스 위치로 한다.
-                                    mCustomPosition[num] = i
-                                    // 서비스에 손님이 있다는 표시를 해준다. (num) -> 없으면 -1이다.
-                                    mItemExistCheck[i] = num
-                                    flag = true  // 손님은 위치를 이동했다는 표시이다.
-                                    if(i == 2){
-                                        // 만약 손님이 마사지 서비스를 받게 되는 경우 손님은 물 혹은 달걀을 요청한다.
-                                        character.visibility = View.GONE
-                                        binding.masa.setImageResource(R.drawable.masaquestion)
-                                        binding.masaStandQuestion.visibility = View.VISIBLE
-                                        if(Random().nextInt(2) == 0) {
-                                            // water = 0
-                                            binding.masaQuestionValue.setImageResource(R.drawable.wateritem)
-                                            binding.masaQuestionValue.setTag(0)
+                    if(mCustomPosition[num] in 0..3 && mItemControlList[mCustomPosition[num]].checkItemIn(v.x, v.y)){
+                        // 손님의 원래 위치가 서비스 영역(얼음방, 불꽃방, 마사지, 라이트)이었고, 이동 후에도 그 서비스 영역이었을 경우
+                        // 쥬디가 그 서비스 영역으로 이동하라는 것으로 인식한다. (쥬디는 서비스 영역(얼음방, 불꽃방, 마사지, 라이트) 을 클릭할 경우 그쪽으로 이동해야하기 때문)
+                        if (indexToCheckBox(mCustomPosition[num]).visibility != ImageView.VISIBLE) {
+                            judyAnimationAdd(mCustomPosition[num])
+                        }
+                    } else {
+                        var flag = false   // 손님이 위치를 이동할 수 있을 경우 : true, 위치를 이동할 수 없을 경우 : false
+                        // 뷰에서 손을 땠을 때 clickImage -> originImage 로 바꾸기
+                        // 손님이 서비스(얼음방, 불꽃방, 마사지, 라이트)를 받을 경우 progressbar 실행한다.
+                        for (i in 0..3) {
+                            if (mItemControlList[i].checkItemIn(v.x, v.y)) {
+                                // 서비스 영역 안에 손님이 들어가 있음 -> 다른 서비스 검사할 필요 없음. (break)
+                                if (mItemControlList[i].isChangeImage) {
+                                    // 손님이 서비스를 받는다!
+                                    mItemControlList[i].changeImage(1)  // originImage 로 바꾼다.
+                                    if (!mItemControlList[i].lock && itemImage.getTag() == i) {
+                                        // 손님이 서비스를 받을 거기 때문에 이전에 위치했던 장소는 비어야 한다.
+                                        mItemExistCheck[mCustomPosition[num]] = -1
+                                        // 손님의 현재 위치를 받을 서비스 위치로 한다.
+                                        mCustomPosition[num] = i
+                                        // 서비스 영역에 손님이 있다는 표시를 해준다. (num) -> 없으면 -1이다.
+                                        mItemExistCheck[i] = num
+                                        flag = true  // 손님은 위치를 이동했다는 표시이다.
+                                        if(i == 2){
+                                            // 만약 손님이 마사지 서비스를 받게 되는 경우 손님은 물 혹은 달걀을 요청한다.
+                                            character.visibility = View.GONE
+                                            binding.masa.setImageResource(R.drawable.masaquestion)
+                                            binding.masaStandQuestion.visibility = View.VISIBLE
+                                            binding.masaQuestion.setImageResource(when(timerView.getTag()){
+                                                1 -> R.drawable.questionone
+                                                2 -> R.drawable.questiontwo
+                                                3 -> R.drawable.questionthree
+                                                else -> R.drawable.question
+                                            })
+                                            if(Random().nextInt(2) == 0) {
+                                                // water = 0
+                                                binding.masaQuestionValue.setImageResource(R.drawable.wateritem)
+                                                binding.masaQuestionValue.setTag(0)
+                                            }
+                                            else {
+                                                // egg = 1
+                                                binding.masaQuestionValue.setImageResource(R.drawable.eggitem)
+                                                binding.masaQuestionValue.setTag(1)
+                                            }
+                                            // 나중에 마사지 서비스를 받기 전 물 혹은 달걀 서비스를 받으면 실행될 마사지의 진행바(프로그래스바)의 정보이다.
+                                            // 마사지 기계는 1대이므로 단일 변수로 저장시켜도 된다.
+                                            snackToProgress = SnackToProgress(character, itemImage, num, i)
                                         }
                                         else {
-                                            // egg = 1
-                                            binding.masaQuestionValue.setImageResource(R.drawable.eggitem)
-                                            binding.masaQuestionValue.setTag(1)
+                                            // 얼음방, 불꽃방, 라이트 서비스를 받게 될 경우, 바로 서비스를 받는다.
+                                            // 서비스를 받는 동안 게이지가 줄어드는 표시(progressbar)를 설정한다.
+                                            mItemControlList[i].progressThread(character, itemImage, num, i)
                                         }
-                                        // 나중에 마사지 서비스를 받기 전 물 혹은 달걀 서비스를 받으면 실행될 마사지의 진행바(프로그래스바)의 정보이다.
-                                        // 마사지 기계는 1대이므로 단일 변수로 저장시켜도 된다.
-                                        snackToProgress = SnackToProgress(character, itemImage, num, i)
-                                    }
-                                    else {
-                                        // 얼음방, 불꽃방, 라이트 서비스를 받게 될 경우, 바로 서비스를 받는다.
-                                        // 서비스를 받는 동안 게이지가 줄어드는 표시(progressbar)를 설정한다.
-                                        mItemControlList[i].progressThread(character, itemImage, num, i)
                                     }
                                 }
-                            }
-                            break
-                        }
-                    }
-                    // 손님이 의자 영역에 있었던 경우, 의자에 앉아있는 손님이 없었던 경우엔 의자에 앉혀야 한다.
-                    if (!flag) {
-                        for (k in 0..2) {
-                            if (mStandControlList[k].isChangeImage && mItemExistCheck[k + 4] == -1) {
-                                // 손님이 의자 영역에 있었고, 의자에 앉아있는 손님이 없었던 경우
-                                // 손님을 의자에 앉힌다.
-                                mStandControlList[k].changeImage(1)  // originImage 로 바꾸기
-                                character.x = mItemPosition[k + 4].x
-                                character.y = mItemPosition[k + 4].y - mItemPosition[k + 4].height
-                                bodyImage.setImageResource(R.drawable.charactersit)
-
-                                mItemExistCheck[k + 4] = num  // 이 의자에 손님이 앉았으니 손님 번호를 넣어줌
-                                // 손님이 이 의자에 앉을 것이므로 이전에 있었던 곳엔 이제 아무도 없으니 -1로 공백으로 둔다.
-                                mItemExistCheck[mCustomPosition[num]] = -1
-                                // 손님의 현재 위치를 이 의자위치로 바꾼다.
-                                mCustomPosition[num] = k + 4
-                                flag = true
                                 break
                             }
                         }
-                    }
-                    // 손님은 서비스 영역(얼음방, 불꽃방, 마사지, 라이트) 혹은 의자(1,2,3) 에만 갈 수 있다.
-                    // 따라서 손님이 어중간한 장소에 놓여지거나 이미 서비스 영역 혹은 의자(1,2,3)에 먼저 온 손님이 있어
-                    // 위치를 옮기지 못하는 경우, 이전에 있던 위치로 되돌아간다.
-                    if (!flag) {
-                        if (mCustomPosition[num] >= 4) {
-                            // 손님이 이전에 있었던 곳이 의자였던 경우 앉아있는 모습으로 바꾼다.
-                            bodyImage.setImageResource(R.drawable.charactersit)
+                        // 손님이 의자 영역에 있었던 경우, 의자에 앉아있는 손님이 없었던 경우엔 의자에 앉혀야 한다.
+                        if (!flag) {
+                            for (k in 0..2) {
+                                if (mStandControlList[k].isChangeImage && mItemExistCheck[k + 4] == -1) {
+                                    // 손님이 의자 영역에 있었고, 의자에 앉아있는 손님이 없었던 경우
+                                    // 손님을 의자에 앉힌다.
+                                    mStandControlList[k].changeImage(1)  // originImage 로 바꾸기
+                                    character.x = mCustomerExistPosition[k + 4].x
+                                    character.y = mCustomerExistPosition[k + 4].y
+                                    bodyImage.setImageResource(R.drawable.charactersit)
+
+                                    mItemExistCheck[k + 4] = num  // 이 의자에 손님이 앉았으니 손님 번호를 넣어줌
+                                    // 손님이 이 의자에 앉을 것이므로 이전에 있었던 곳엔 이제 아무도 없으니 -1로 공백으로 둔다.
+                                    mItemExistCheck[mCustomPosition[num]] = -1
+                                    // 손님의 현재 위치를 이 의자위치로 바꾼다.
+                                    mCustomPosition[num] = k + 4
+                                    flag = true
+                                    break
+                                }
+                            }
                         }
-                        if(mCustomPosition[num] != -1){
-                            // 현재 손님이 원래 있던 곳으로 되돌아간다.
-                            character.x = mItemPosition[mCustomPosition[num]].x
-                            character.y = mItemPosition[mCustomPosition[num]].y
+                        // 손님은 서비스 영역(얼음방, 불꽃방, 마사지, 라이트) 혹은 의자(1,2,3) 에만 갈 수 있다.
+                        // 따라서 손님이 어중간한 장소에 놓여지거나 이미 서비스 영역 혹은 의자(1,2,3)에 먼저 온 손님이 있어
+                        // 위치를 옮기지 못하는 경우, 이전에 있던 위치로 되돌아간다.
+                        if (!flag) {
+                            if (mCustomPosition[num] >= 4) {
+                                // 손님이 이전에 있었던 곳이 의자였던 경우 앉아있는 모습으로 바꾼다.
+                                bodyImage.setImageResource(R.drawable.charactersit)
+                            }
+                            if(mCustomPosition[num] != -1){
+                                // 현재 손님이 원래 있던 곳으로 되돌아간다.
+                                character.x = mCustomerExistPosition[mCustomPosition[num]].x
+                                character.y = mCustomerExistPosition[mCustomPosition[num]].y
+                            }
                         }
                     }
                 }
@@ -539,12 +565,14 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
     fun judyAnimationStart(version: Int) {
         // version : 0. iceRoom 1. FireRoom 2. masa 3. light 4. water 5. egg 6. waste
         // mItemPosition : [0]얼음방, [1]불꽃방, [2]마사지, [3]라이트, [4]의자1 , [5]의자2, [6]의자3, [7] 물 [8] 달걀 [9] 쓰레기통
+
         when(version){
-            in 0..3 -> {
-                mJudyAnimation.setPositionValue(version, mItemPosition[version].x, mItemPosition[version].y)
-            }
+            0 -> mJudyAnimation.setPositionValue(version, mItemPosition[version].x + mItemPosition[version].width/2, mItemPosition[version].y + mItemPosition[version].height/2)
+            1 -> mJudyAnimation.setPositionValue(version, mItemPosition[version].x + mItemPosition[version].width/3, mItemPosition[version].y + mItemPosition[version].height/2)
+            2 -> mJudyAnimation.setPositionValue(version, mItemPosition[version].x + mItemPosition[version].width/2, mItemPosition[version].y + mItemPosition[version].height/2)
+            3 -> mJudyAnimation.setPositionValue(version, mItemPosition[version].x - mItemPosition[version].width/2, mItemPosition[version].y + mItemPosition[version].height/2)
             else -> {
-                mJudyAnimation.setPositionValue(version, mItemPosition[version + 3].x, mItemPosition[version + 3].y)
+                mJudyAnimation.setPositionValue(version, mItemPosition[version + 3].x - mItemPosition[version + 3].width, mItemPosition[version + 3].y)
             }
         }
         mJudyAnimation.startAnimation()
@@ -659,5 +687,9 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
                 }
             }
         }
+    }
+
+    private fun gameFinish(){
+
     }
 }

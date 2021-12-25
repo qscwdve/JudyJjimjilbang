@@ -43,42 +43,46 @@ class JudyAnimation(val character: View, val orderQueue : Queue<Int>, val activi
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onAnimationEnd(animation: Animation?) {
-        // 쥬디가 이동해야할 곳으로 애니메이션이 완료하면, 위치를 이동해야할 곳으로 바꾼다.
-        character.x = positionX
-        character.y = positionY
-        // 쥬디가 이동을 완료했으니 체크박스는 없어져야 한다.
-        activity.indexToCheckBox(version).visibility = ImageView.GONE
-        if(this.version <= 3){
-            // 쥬디가  0. iceRoom 1. FireRoom 2. masa 3. light 중 한 영역에 다가갔을 경우
-            activity.getCustomerMoneyOrSnackCheck(this.version)
-        }
-        else {
-            // 쥬디가 4. water , 5. egg , 6. waste 에 다가갔을 경우
-            activity.snackClickControl(this.version)
-        }
-        // 쥬디가 이동을 완료했으니 이동해야할 경로도 지워준다.
-        orderQueue.remove()
-        if(orderQueue.size != 0){
-            // 앞으로 쥬디가 이동해야할 경로가 아직 남아있으면 그쪽으로 이동한다.
-            activity.judyAnimationStart(orderQueue.element())
-        } else {
-            // 쥬디가 가야할 곳이 더이상 없으면 초기 위치로 돌아간다.
-            val X = judyInitX - character.x
-            val Y = judyInitY - character.y
-            val adni = TranslateAnimation(0f, X, 0f, Y).apply {
-                duration = 2000
+        if(!activity.mfinish){
+            // 쥬디가 이동해야할 곳으로 애니메이션이 완료하면, 위치를 이동해야할 곳으로 바꾼다.
+            character.x = positionX
+            character.y = positionY
+            // 쥬디가 이동을 완료했으니 체크박스는 없어져야 한다.
+            activity.indexToCheckBox(version).visibility = ImageView.GONE
+
+            if(this.version <= 3){
+                // 쥬디가  0. iceRoom 1. FireRoom 2. masa 3. light 중 한 영역에 다가갔을 경우
+                activity.getCustomerMoneyOrSnackCheck(this.version)
             }
-            adni.setAnimationListener(object : Animation.AnimationListener{
-                override fun onAnimationStart(animation: Animation?) {}
-                override fun onAnimationEnd(animation: Animation?) {
-                    // 초기위치로 이동하는 애니메이션이 끝나면 초기위치로 이동한다.
-                    character.x = judyInitX
-                    character.y = judyInitY
+            else {
+                // 쥬디가 4. water , 5. egg , 6. waste 에 다가갔을 경우
+                activity.snackClickControl(this.version)
+            }
+            // 쥬디가 이동을 완료했으니 이동해야할 경로도 지워준다.
+            orderQueue.remove()
+            if(orderQueue.size != 0){
+                // 앞으로 쥬디가 이동해야할 경로가 아직 남아있으면 그쪽으로 이동한다.
+                activity.judyAnimationStart(orderQueue.element())
+            } else {
+                // 쥬디가 가야할 곳이 더이상 없으면 초기 위치로 돌아간다.
+                val X = judyInitX - character.x
+                val Y = judyInitY - character.y
+                val adni = TranslateAnimation(0f, X, 0f, Y).apply {
+                    duration = 2000
                 }
-                override fun onAnimationRepeat(animation: Animation?) {}
-            })
-            character.startAnimation(adni)
+                adni.setAnimationListener(object : Animation.AnimationListener{
+                    override fun onAnimationStart(animation: Animation?) {}
+                    override fun onAnimationEnd(animation: Animation?) {
+                        // 초기위치로 이동하는 애니메이션이 끝나면 초기위치로 이동한다.
+                        character.x = judyInitX
+                        character.y = judyInitY
+                    }
+                    override fun onAnimationRepeat(animation: Animation?) {}
+                })
+                character.startAnimation(adni)
+            }
         }
+
     }
 
     override fun onAnimationRepeat(animation: Animation?) {

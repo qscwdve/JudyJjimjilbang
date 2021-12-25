@@ -56,6 +56,7 @@ class EventItemControl(val originImage : Int, val clickImage: Int, val activity:
     // 손님이 서비스 받는 게이지를 실행해준다.
     @RequiresApi(Build.VERSION_CODES.N)
     fun progressThread(character: View, itemImageView: ImageView, num : Int, now : Int){
+        // now : 현재 받을 서비스 번호 , num : 손님 번호
         character.visibility = View.GONE
         progress.setProgress(100, false)
         progress.visibility = View.VISIBLE
@@ -75,8 +76,8 @@ class EventItemControl(val originImage : Int, val clickImage: Int, val activity:
             }
             // 손님이 서비스를 다 받으면 다음엔 어떤 서비스를 받을지 선택해야한다.
             handler.post {
-                character.x = this.X
-                character.y = this.Y
+                character.x = activity.mCustomerExistPosition[now].x
+                character.y = activity.mCustomerExistPosition[now].y
                 character.visibility = View.VISIBLE
                 progress.visibility = View.GONE
                 view.setImageResource(originImage)
