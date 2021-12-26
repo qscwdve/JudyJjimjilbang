@@ -689,6 +689,12 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
     }
 
     private fun gameFinish(){
+        // 게임 종료 다이얼로그를 띄운다.
+        val dialog = GameoverDialog(this, mCustomerFinishCount*10)
+        dialog.show(supportFragmentManager, "gameover")
+    }
+
+    fun startRankActivity() {
 
     }
 }

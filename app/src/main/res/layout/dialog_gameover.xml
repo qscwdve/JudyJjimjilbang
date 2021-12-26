@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/lightBrown"
+        android:gravity="center"
+        android:paddingVertical="10sp"
+        android:text="게임 종료"
+        android:textColor="@color/white"
+        android:textSize="23sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/gameover_score"
+        android:paddingVertical="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:background="@color/white"
+        android:text="당신의 점수는 20점입니다."
+        android:textColor="@color/black"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/gameover_ok"
+        android:layout_width="match_parent"
+        android:text="확인"
+        android:padding="5sp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:background="@color/lightBrown"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>
