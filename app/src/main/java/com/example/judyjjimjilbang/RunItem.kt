@@ -16,6 +16,7 @@ class RunItem {
             valueChange(now, true)
         }
         if(count < 3) {
+            // 서비스를 선택한다.
             val random = Random()
             var number = random.nextInt(4)
             while (indexToCheck(number)) number = random.nextInt(4)

@@ -313,7 +313,6 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
                 }
                 if(i == 4){
                     // 이 손님(num)의 욕구를 시간내에 충족시키지 못해 타임 오버로 게임이 종료되었다.
-                    // Toast.makeText(this, "this game is over", Toast.LENGTH_SHORT).show()
                     mfinish = true
                     handler.post {
                         runItemValueView.setImageResource(R.drawable.question_finish)

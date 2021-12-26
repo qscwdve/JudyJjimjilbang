@@ -79,7 +79,7 @@ class EventItemControl(val originImage : Int, val clickImage: Int, val activity:
                 character.x = activity.mCustomerExistPosition[now].x
                 character.y = activity.mCustomerExistPosition[now].y
                 character.visibility = View.VISIBLE
-                progress.visibility = View.GONE
+                progress.visibility = View.GONE    // 게이지는 사라진다.
                 view.setImageResource(originImage)
 
                 // 다음 서비스 선택
