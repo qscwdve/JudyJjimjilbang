@@ -10,4 +10,7 @@
 
     <color name="brown">#4E2C2C</color>
     <color name="lightBrown">#603737</color>
+    <color name="pink">#C8A5A5</color>
+    <color name="gray">#555555</color>
+    <color name="darkYellow">#FF9800</color>
 </resources>

@@ -1,6 +1,7 @@
 package com.example.judyjjimjilbang
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -278,18 +279,18 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
         // num : 손님 번호
         val thread1 = Thread(){
             for(i in 1..4){
-                // 6초에 한번씩 손님이 기다릴 수 있는 인내심이 떨어진다.
+                // 8초에 한번씩 손님이 기다릴 수 있는 인내심이 떨어진다.
                 // 총 3번 참을 수 있다. 4번이 되면 손님의 인내심이 바닥나고 게임은 종료된다.
-                for(time in 1..60){
+                for(time in 1..80){
                     Thread.sleep(100)
                     if(mCustomPosition[num] == -1 || mfinish){
                         // 손님이 제시간내에 서비스를 다 받아서 가게를 나간 상태, 이미 손님 캐릭터도 지워졌다.
-                        return@Thread
+                        break
                     }
                 }
                 if(mCustomPosition[num] == -1 || mfinish){
                     // 손님이 제시간내에 서비스를 다 받아서 가게를 나간 상태, 이미 손님 캐릭터도 지워졌다.
-                    return@Thread
+                    break
                 } else {
                     handler.post {
                         val questionImage = when(i){
@@ -309,17 +310,16 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
 
                 if(mfinish) {
                     // 이미 다른 손님의 욕구를 충족시키지 못해 게임이 끝난 상태
-                    return@Thread
-                }
-                if(i == 4){
+                    break
+                } else if(i == 4){
                     // 이 손님(num)의 욕구를 시간내에 충족시키지 못해 타임 오버로 게임이 종료되었다.
                     mfinish = true
                     handler.post {
                         runItemValueView.setImageResource(R.drawable.question_finish)
-                        Toast.makeText(this, "the game is over!", Toast.LENGTH_SHORT).show()
+                        // Toast.makeText(this, "the game is over!", Toast.LENGTH_SHORT).show()
                         gameFinish()
                     }
-                    return@Thread
+                    break
                 }
             }
         }
@@ -555,8 +555,9 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
         indexToCheckBox(version).visibility = ImageView.VISIBLE
         // 쥬디가 움직여야하는 경로를 담고있는 큐에 경로를 추가한다.
         mJudyclickQueue.add(version)
-        if (mJudyclickQueue.size == 1) {
-            // 쥬디가 그 경로에 움직이는 것이 처음이면 직접 움직이도록 해준다.
+        // 쥬디가 움직이지 않고 있었는데 새로운 경로를 추가한 경우
+        if (mJudyclickQueue.size == 1 && !mJudyAnimation.animationFlag) {
+            // 쥬디가 직접 움직이도록 해준다.
             judyAnimationStart(version)
         }
     }
@@ -695,6 +696,15 @@ class GameActivity : BaseActivity<ActivityGameBinding>(ActivityGameBinding::infl
     }
 
     fun startRankActivity() {
+        val intent = Intent(this, RankActivity::class.java).apply {
+            putExtra("score", mCustomerFinishCount*10)
+        }
+        startActivity(intent)
+        finish()
+    }
 
+    override fun onDestroy() {
+        mfinish = false
+        super.onDestroy()
     }
 }

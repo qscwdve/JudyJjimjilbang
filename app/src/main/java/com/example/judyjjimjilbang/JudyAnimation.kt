@@ -14,6 +14,7 @@ class JudyAnimation(val character: View, val orderQueue : Queue<Int>, val activi
     var version = 0
     var judyInitX : Float = 0F
     var judyInitY : Float = 0F
+    var animationFlag = false        // 애니메이션이 시작했으면 true, 끝났으면 false
 
     fun setPositionValue(version: Int, X: Float, Y: Float){
         //version : 0. iceRoom 1. FireRoom 2. masa 3. light 4. water 5. egg 6. waste
@@ -38,7 +39,7 @@ class JudyAnimation(val character: View, val orderQueue : Queue<Int>, val activi
         character.startAnimation(adni)
     }
     override fun onAnimationStart(animation: Animation?) {
-
+        this.animationFlag = true
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -76,6 +77,9 @@ class JudyAnimation(val character: View, val orderQueue : Queue<Int>, val activi
                         // 초기위치로 이동하는 애니메이션이 끝나면 초기위치로 이동한다.
                         character.x = judyInitX
                         character.y = judyInitY
+                        this@JudyAnimation.animationFlag = false
+                        // 앞으로 쥬디가 이동해야할 경로가 아직 남아있으면 그쪽으로 이동한다.
+                        if(orderQueue.size != 0) activity.judyAnimationStart(orderQueue.element())
                     }
                     override fun onAnimationRepeat(animation: Animation?) {}
                 })
