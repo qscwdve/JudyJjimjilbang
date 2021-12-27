@@ -6,7 +6,7 @@
 - 만들어볼 게임은 쥬디의 찜질방 게임입니다.
 - 게임하러 가기 → https://vidkidz.tistory.com/1856
 
-### 만든 과정 참고
+### 만든 과정 설명
 - https://laustudy.tistory.com/144
 
 ### 사용 스택
