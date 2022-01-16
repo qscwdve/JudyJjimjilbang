@@ -17,5 +17,5 @@
 ### 만든 과정 설명
 - https://laustudy.tistory.com/144
 
-### 결과물 보러가기
+### 시연 동영상
 - https://youtu.be/aSyh8yuwnXM
