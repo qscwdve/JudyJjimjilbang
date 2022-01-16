@@ -11,6 +11,9 @@
 - Thread
 - SQLite (데이터베이스)
 
+### 개발 환경
+- Android Stdio
+
 ### 만든 과정 설명
 - https://laustudy.tistory.com/144
 
